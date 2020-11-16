@@ -79,8 +79,8 @@ class LaunchpadMK2(base.LaunchpadBase):
     def set_column_colour(self, column, colour):
         self.send_sysex_message(12, column, colour)
 
-    def set_row_colour(self, row, colour):
-        self.send_sysex_message(13, 8 - row, colour)
+    def set_row_colour(self, row, colour, raw_row_order=False):
+        self.send_sysex_message(13, row if raw_row_order else 8 - row, colour)
 
     def set_all_led_colour(self, colour):
         self.send_sysex_message(14, colour)
@@ -115,11 +115,11 @@ class LaunchpadMK2(base.LaunchpadBase):
         if column != 8:
             self.set_led_rgb(top, red, green, blue)
 
-    def set_row_rgb(self, row, red, green, blue):
+    def set_row_rgb(self, row, red, green, blue, raw_row_order=False):
         start = 104
 
         if row != 0:
-            start = 11 + 10 * (8 - row)
+            start = 11 + 10 * (row if raw_row_order else 8 - row)
 
         for key in range(start, start + 9):
             self.set_led_rgb(key, red, green, blue)
