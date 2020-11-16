@@ -85,6 +85,18 @@ class LaunchpadMK2(base.LaunchpadBase):
     def set_all_led_colour(self, colour):
         self.send_sysex_message(14, colour)
 
+    def initialise_fader(self, number, colour, value):
+        if self.layout is not enums.MK2Layout.Volume and \
+            self.layout is not enums.MK2Layout.Pan:
+
+            raise enums.Errors.WrongLayout(
+                "Layout must be either 'Volume' or 'Pan' to use faders! Current layout: {}".format(
+                    enums.MK2Layout.layout_name(self.layout)
+                )
+            )
+
+        self.send_sysex_message(43, number, 4 - self.layout, colour, value)
+
     ## RGB
 
     def set_led_rgb(self, key, red, green, blue):
