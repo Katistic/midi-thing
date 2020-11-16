@@ -5,3 +5,10 @@ class MK2Layout:
     Ableton = 3
     Volume = 4
     Pan = 5
+
+class Errors:
+    class WrongLayout(Exception):
+        pass
+
+    class InvalidLayout(Exception):
+        pass
