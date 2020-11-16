@@ -17,6 +17,7 @@ class LaunchpadMK2(base.LaunchpadBase):
 
     def open(self):
         super().open()
+        self.set_layout(enums.MK2Layout.Session)
 
     def send_message(self, key, colour, channel=None):
         if channel is None:
