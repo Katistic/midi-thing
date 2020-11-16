@@ -124,3 +124,49 @@ class LaunchpadMK2(base.LaunchpadBase):
 
     def _callback(self, msg, data=None):
         msg = msg[0]
+class MK2Key(base.LaunchpadKey):
+    def __init__(self, msg, layout):
+        super().__init__(msg)
+
+        self.name = self.get_name(layout)
+
+    def __repr__(self):
+        return "MK2Key(channel={}, key={}, state={}, time={}, name={})".format(
+            self.channel,
+            self.key,
+            self.state,
+            self.time,
+            self.name
+        )
+
+    def get_name(self, layout):
+        top = ["Up", "Down", "Left", "Right", "Session", "User 1", "User 2", "Mixer"]
+        right = ["Record Arm", "Solo", "Mute", "Stop", "Send B", "Send A", "Pan", "Volume"]
+
+        # TODO: Key notes instead of 'Generic Key'
+        # TODO: More descriptive name than 'Not a Key!'
+
+        if layout == enums.MK2Layout.Session:
+            if self.channel == 176:
+                return top[self.key - 104]
+            elif self.channel == 144:
+                if str(self.key).endswith("9"):
+                    return right[int(str(self.key)[0]) - 1]
+                return "Generic Key"
+            return "Not a Key!"
+        if layout == enums.MK2Layout.User1:
+            if self.channel == 181:
+                return top[self.key - 104]
+            elif self.channel == 149:
+                if self.key >= 100:
+                    return right[self.key - 100]
+                return "Generic Key"
+            return "Not a Key!"
+        elif layout == enums.MK2Layout.User2:
+            if self.channel == 189:
+                return top[self.key - 104]
+            elif self.channel == 157:
+                if str(self.key).endswith("9"):
+                    return right[int(str(self.key)[0]) - 1]
+                return "Generic Key"
+            return "Not a Key!"
