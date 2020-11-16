@@ -2,8 +2,16 @@ import time
 from midistuff.launchpad import mk2, enums
 
 mk2 = mk2.LaunchpadMK2()
-mk2.open()
 
+@mk2.event
+def on_key_up(key):
+    print("KEY UP! " + str(key))
+
+@mk2.event
+def on_key_down(key):
+    print("KEY DOWN! " + str(key))
+
+mk2.open()
 
 ## Grouped RGB commands are much slower than grouped colour commands
 

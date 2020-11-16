@@ -122,8 +122,30 @@ class LaunchpadMK2(base.LaunchpadBase):
 
     # Callback
 
+    def event(self, func):
+        if func.__name__ == "on_key_down":
+            self.on_key_down = func
+            return func
+        elif func.__name__ == "on_key_up":
+            self.on_key_up = func
+            return func
+
+        raise TypeError("Event function must be either 'on_key_down' or 'on_key_up'!")
+
     def _callback(self, msg, data=None):
-        msg = msg[0]
+        key = MK2Key(msg, self.layout)
+
+        if key.state == 127:
+            self.on_key_down(key)
+        elif key.state == 0:
+            self.on_key_up(key)
+
+    def on_key_down(self, key):
+        pass
+
+    def on_key_up(self, key):
+        pass
+
 class MK2Key(base.LaunchpadKey):
     def __init__(self, msg, layout):
         super().__init__(msg)
