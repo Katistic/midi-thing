@@ -1,40 +1,9 @@
-from midistuff.controller import MidiController
-from multiprocessing import Process, Pipe
+from midistuff.launchpad import enums, base
 
-import multiprocessing
-import threading
 import time
 import math
 
-multiprocessing.set_start_method('spawn')
-
-
-class MK2Layout:
-    Session = 0
-    User1 = 1
-    User2 = 2
-    Ableton = 3
-    Volume = 4
-    Pan = 5
-
-class LaunchpadBase(MidiController):
-    def __init__(self):
-        super().__init__()
-
-        self.session = 1
-        self.user1 = 2
-        self.user2 = 3
-
-        self.out_channel = 1
-        self.name = "Launchpad"
-
-        self.valid_keys = [key for key in range(11, 99)] + [key for key in range(104, 112)]
-
-    def open(self):
-        super().open(self.name)
-        self.reset_all_leds()
-
-class LaunchpadMK2(LaunchpadBase):
+class LaunchpadMK2(base.LaunchpadBase):
     def __init__(self):
         super().__init__()
 
@@ -42,7 +11,7 @@ class LaunchpadMK2(LaunchpadBase):
         self.user2 = 14
 
         self.name = "Launchpad MK2"
-        self.layout = MK2Layout.Session
+        self.layout = enums.MK2Layout.Session
 
     def open(self):
         super().open()
@@ -51,9 +20,9 @@ class LaunchpadMK2(LaunchpadBase):
         if channel is None:
             channel = self.session
 
-            if self.layout == MK2Layout.User1:
+            if self.layout == enums.MK2Layout.User1:
                 channel = self.user1
-            elif self.layout == MK2Layout.User2:
+            elif self.layout == enums.MK2Layout.User2:
                 channel = self.user2
 
         self.send_raw_message([143 + channel, key, colour])
@@ -148,4 +117,7 @@ class LaunchpadMK2(LaunchpadBase):
     def reset_all_leds(self):
         self.set_all_led_colour(0)
 
-    # Misc
+    # Callback
+
+    def _callback(self, msg, data=None):
+        msg = msg[0]

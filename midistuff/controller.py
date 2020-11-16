@@ -83,8 +83,6 @@ class MidiController:
         self.midiout.send_message(data)
 
     def _callback(self, msg, data=None):
-        msg = msg[0]
-
         print(msg)
         print(data)
 

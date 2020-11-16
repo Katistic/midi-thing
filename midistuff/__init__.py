@@ -1,2 +1,2 @@
 from midistuff.controller import *
-from midistuff import launchpad_controller
+from midistuff import launchpad
