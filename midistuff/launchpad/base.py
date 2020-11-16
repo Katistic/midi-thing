@@ -8,10 +8,7 @@ class LaunchpadBase(MidiController):
         self.user1 = 2
         self.user2 = 3
 
-        self.out_channel = 1
         self.name = "Launchpad"
-
-        self.valid_keys = [key for key in range(11, 99)] + [key for key in range(104, 112)]
 
     def open(self):
         super().open(self.name)

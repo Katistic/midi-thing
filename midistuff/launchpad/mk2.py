@@ -13,6 +13,8 @@ class LaunchpadMK2(base.LaunchpadBase):
         self.name = "Launchpad MK2"
         self.layout = enums.MK2Layout.Session
 
+        self.valid_keys = [key for key in range(11, 99)] + [key for key in range(104, 112)]
+
     def open(self):
         super().open()
 
