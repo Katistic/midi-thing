@@ -13,13 +13,14 @@ def on_key_down(key):
 
 mk2.open()
 
-## Grouped RGB commands are much slower than grouped colour commands
+mk2.set_all_led_colour(3)
+mk2.set_led_colour(104, 21)
+mk2.set_row_colour(8, 5)
+mk2.set_column_colour(2, 67)
 
-mk2.set_all_led_rgb(63, 63, 63)
-mk2.set_led_rgb(104, 0, 63, 0)
 mk2.set_led_colour_pulsing(56, 25)
-mk2.set_row_rgb(8, 63, 0, 0)
-mk2.set_column_rgb(2, 0, 0, 63)
+mk2.set_led_colour_flashing(89, 127)
+
 
 try:
     while True:
