@@ -1,5 +1,4 @@
 from midistuff.launchpad import enums, base
-
 import time
 import math
 
@@ -30,8 +29,8 @@ class LaunchpadMK2(base.LaunchpadBase):
 
         self.send_raw_message([143 + channel, key, colour])
 
-    def send_sysex_message(self, mode, *data):
-        super().send_raw_message([240, 0, 32, 41, 2, 24] + [mode] + list(data) + [247])
+    def send_sysex_message(self, mode, *data, extdata=[]):
+        super().send_raw_message([240, 0, 32, 41, 2, 24] + [mode] + list(data) + extdata + [247])
 
     # Helpers
 
