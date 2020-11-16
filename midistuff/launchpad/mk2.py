@@ -44,6 +44,7 @@ class LaunchpadMK2(base.LaunchpadBase):
     # Commands
 
     def set_layout(self, layout):
+        enums.MK2Layout.layout_name(layout)
         self.send_sysex_message(34, layout)
 
     def get_device(self, id):
