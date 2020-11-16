@@ -84,6 +84,33 @@ class LaunchpadMK2(base.LaunchpadBase):
     def set_all_led_colour(self, colour):
         self.send_sysex_message(14, colour)
 
+    '''
+    Example:
+    start_text_scroll(127, 5, "Hello, ", 2, "World!", loop=True)
+
+    127: Colour
+    5: First speed
+    "Hello, ": Text to play at speed 5
+    2: Second speed
+    "World!": Text to play at speed 2
+    loop=True: Loop the text
+    '''
+    def start_text_scroll(self, colour, *textandspeed, loop=False):
+        data = []
+
+        for thing in textandspeed:
+            if type(thing) == str:
+                thing = thing.encode("ascii").decode("ascii")
+                for c in thing:
+                    data.append(ord(c))
+            elif type(thing) == int:
+                if thing > 7 or thing < 0:
+                    thing = 4
+
+                data.append(thing)
+
+        self.send_sysex_message(20, colour, int(loop), extdata=data)
+
     def initialise_fader(self, number, colour, value):
         if self.layout is not enums.MK2Layout.Volume and \
             self.layout is not enums.MK2Layout.Pan:
