@@ -7,7 +7,7 @@ class MK2Layout:
     Pan = 5
 
     @staticmethod
-    def layout_name(self, t):
+    def layout_name(t):
         layouts = ["Session", "User 1", "User 2", "Ableton", "Volume", "Pan"]
         if t < len(layouts) and t >= 0:
             return layouts[t]
