@@ -14,6 +14,12 @@ class MK2Layout:
 
         raise Errors.InvalidLayout("Layout does not exist!")
 
+class SysexMessage:
+    UnknownSysexMessage = 0
+    DeviceFirmwareRevision = 1
+    BootloaderFirmwareRevision = 2
+    FinishTextScroll = 3
+
 class Errors:
     class WrongLayout(Exception):
         pass

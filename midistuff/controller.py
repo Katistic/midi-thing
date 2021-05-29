@@ -23,6 +23,27 @@ class MidiMessage:
             bool(self.state)
         )
 
+class SysexMessage:
+    def __init__(self, name, raw, **data):
+        self.name = name
+        self.raw = raw
+        self.attribs = []
+
+        for key in data:
+            setattr(self, key, data[key])
+            self.attribs.append(key)
+
+    def __repr__(self):
+        msg = "SysexMessage(\n  name=%s\n" % self.name
+
+        if len(self.attribs) > 0:
+            for attrib in self.attribs:
+                msg += "  {}={}\n".format(attrib, getattr(self, attrib))
+        else:
+            msg += "  raw={}\n".format(self.raw)
+
+        return msg + ")"
+
 class MidiController:
     def __init__(self):
         self.midiin = rtmidi.MidiIn()

@@ -1,4 +1,5 @@
 from midistuff.launchpad import enums, base
+from midistuff.controller import SysexMessage
 import time
 import math
 
@@ -13,6 +14,51 @@ class LaunchpadMK2(base.LaunchpadBase):
         self.layout = enums.MK2Layout.Session
 
         self.valid_keys = [key for key in range(11, 99)] + [key for key in range(104, 112)]
+
+        '''
+        Defines all expected sysex sysex_messages
+        name:
+            Sysex Message Name
+
+        groups:
+            List of data groups with format
+                0: Start index of data
+                1: End index of data
+                2: Data type
+                3: Name, must be pep8 standard
+
+        headers:
+            Headers used to define sysex message
+            Excludes 240 channel since its constant
+            None means header is dynamic
+
+        type:
+            Int used to make checking sysex message type easier
+        '''
+        self.sysex_structs = [
+            {
+                "name": "Device Firmware Revision",
+                "groups": [[2, 2, int, "device_id"], [12, 15, int, "firmware_ver"]],
+                "headers": [126, None, 6, 2, 0, 32, 41, 105, 0, 0, 0],
+                "type": enums.SysexMessage.DeviceFirmwareRevision
+            },
+            {
+                "name": "Bootloader Firmware Versions",
+                "groups": [
+                    [6, 11, int, "bootloader_ver"],
+                    [12, 15, int, "firmware_ver"],
+                    [16, 17, int, "bootloader_size"]
+                ],
+                "headers": [0, 32, 41, 0, 112],
+                "type": enums.SysexMessage.BootloaderFirmwareRevision
+            },
+            {
+                "name": "Finish Text Scroll",
+                "groups": [],
+                "headers": [0, 32, 41, 2, 24, 21],
+                "type": enums.SysexMessage.FinishTextScroll
+            }
+        ]
 
     def open(self):
         super().open()
@@ -39,6 +85,10 @@ class LaunchpadMK2(base.LaunchpadBase):
 
     def xy_to_number(self, x, y, force_session=False):
         return 104
+
+    def is_sysex_message(self, msg):
+        if msg[0][0] == 240 and len(msg[0]) > 3:
+            return True
 
     # Commands
 
@@ -168,21 +218,66 @@ class LaunchpadMK2(base.LaunchpadBase):
         elif func.__name__ == "on_key_up":
             self.on_key_up = func
             return func
+        elif func.__name__ == "on_sysex_message":
+            self.on_sysex_message = func
+            return func
 
-        raise TypeError("Event function must be either 'on_key_down' or 'on_key_up'!")
+        raise TypeError("Event function must be either 'on_key_down', 'on_key_up', or 'on_sysex_message'!")
 
     def _callback(self, msg, data=None):
-        key = MK2Key(msg, self.layout)
+        if self.is_sysex_message(msg):
+            msg_struct = {}
 
-        if key.state == 127:
-            self.on_key_down(key)
-        elif key.state == 0:
-            self.on_key_up(key)
+            for struct in self.sysex_structs:
+                is_struct = True
+                header_index = 0
+
+                for header in struct["headers"]:
+                    header_index += 1
+
+                    if header == None:
+                        continue
+
+                    if header != msg[0][header_index]:
+                        is_struct = False
+                        break
+
+                if is_struct:
+                    msg_struct = struct
+                    break
+
+            if msg_struct == {}:
+                msg = SysexMessage("Unknown Sysex Message", msg)
+                msg.type = enums.SysexMessage.UnknownSysexMessage
+            else:
+                datas = {}
+                for group in msg_struct["groups"]:
+                    data = ""
+                    for index in range(group[0], group[1] + 1):
+                        data += str(msg[0][index])
+
+                    if group[2] != str:
+                        datas[group[3]] = group[2](data)
+
+                msg = SysexMessage(msg_struct["name"], msg, **datas)
+                msg.type = msg_struct["type"]
+
+            self.on_sysex_message(msg)
+        else:
+            key = MK2Key(msg, self.layout)
+
+            if key.state == 127:
+                self.on_key_down(key)
+            elif key.state == 0:
+                self.on_key_up(key)
 
     def on_key_down(self, key):
         pass
 
     def on_key_up(self, key):
+        pass
+
+    def on_sysex_message(self, msg):
         pass
 
 class MK2Key(base.LaunchpadKey):

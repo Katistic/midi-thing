@@ -12,6 +12,7 @@ class LaunchpadBase(MidiController):
 
     def open(self):
         super().open(self.name)
+        self.midiin.ignore_types(sysex=False)
         self.reset_all_leds()
 
 class LaunchpadKey:
