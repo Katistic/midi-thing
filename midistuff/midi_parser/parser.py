@@ -86,8 +86,8 @@ class MTrk:
                 event_type = self._correct_byte(bits[:4])
 
                 channel = self._correct_byte(bits[4:])
-                param1 = data[loaded_data+2]
-                param2 = data[loaded_data+3]
+                param1 = data[loaded_data+1]
+                param2 = data[loaded_data+2]
 
                 loaded_data += 2
                 event = events.get_event(
@@ -118,6 +118,9 @@ class MTrk:
         self.last_read_event = events[-1]
         self.last_index = event_index - 1
 
+        if len(events) == 1:
+            self.last_index += 1
+
         return events
 
 
@@ -136,32 +139,20 @@ class MidiFile:
 
         self.open()
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *args):
-        self.close()
-
     def open(self):
-        if self._file is None:
-            self._file = open(self.file, "rb", buffering=0)
+        with open(self.file, "rb", buffering=0) as file:
 
             # Read header chunk
-            self.header = MThd(self._file.read(14))
+            self.header = MThd(file.read(14))
 
             for chunk_index in range(0, self.header.track_count):
-                self.chunks.append(self._read_next_chunk())
+                self.chunks.append(self._read_next_chunk(file))
 
         logging.info(f'LOADED {len(self.chunks)} CHUNKS AND {sum([len(chunk.events) for chunk in self.chunks])} EVENTS')
 
-    def close(self):
-        if self._file is not None:
-            self._file.close()
-            self._file = None
-
-    def _read_next_chunk(self):
-        chunk = MTrk(self._file.read(8))
-        chunk._load_data(self._file.read(chunk.chunk_size))
+    def _read_next_chunk(self, file):
+        chunk = MTrk(file.read(8))
+        chunk._load_data(file.read(chunk.chunk_size))
 
         return chunk
 

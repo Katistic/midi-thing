@@ -95,7 +95,7 @@ class SetTempoEvent(MetaEvent):
     def __init__(self, delta_time, data):
         super().__init__(delta_time, 81)
 
-        self.ms_per_quater_note = int.from_bytes(data, "big")
+        self.ms_per_quater_note = 60000000 / int.from_bytes(data, "big")
 
 
 class TimeSignatureEvent(MetaEvent):
@@ -103,7 +103,7 @@ class TimeSignatureEvent(MetaEvent):
         super().__init__(delta_time, 88)
 
         self.numer = data[0]
-        self.denom = data[1]
+        self.denom = 2**data[1]
         self.metro = data[2]
         self.ttnds = data[3]
 
@@ -116,9 +116,8 @@ class KeySignatureEvent(MetaEvent):
         self.scale = data[1]
 
 
-def get_event(delta_time, event_type, data, meta_type=None, channel=None):
-    print(delta_time)
 
+def get_event(delta_time, event_type, data, meta_type=None, channel=None):
     meta_events = {
         2: CopyrightNoticeEvent,
         3: TrackNameEvent,
