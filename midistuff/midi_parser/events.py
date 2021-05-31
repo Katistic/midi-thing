@@ -82,7 +82,7 @@ class TrackNameEvent(MetaEvent):
         self.name = data.decode("ascii")
 
     def __repr__(self):
-        return "Track Name: " + self.name
+        return f"TrackNameEvent(name={self.name})"
 
 
 class InstrumentNameEvent(MetaEvent):
@@ -92,7 +92,7 @@ class InstrumentNameEvent(MetaEvent):
         self.name = data.decode("ascii")
 
     def __repr__(self):
-        return "Instrument Name: " + self.name
+        return f"InstrumentNameEvent(name={self.name})"
 
 
 class EndOfTrackEvent(MetaEvent):
@@ -107,23 +107,23 @@ class SetTempoEvent(MetaEvent):
     def __init__(self, delta_time, data):
         super().__init__(delta_time, 81)
 
-        self.ms_per_quater_note = 60000000 / int.from_bytes(data, "big")
+        self.tempo = 60000000 / int.from_bytes(data, "big")
 
     def __repr__(self):
-        return "Set Tempo: " + str(self.ms_per_quater_note)
+        return f"SetTempoEvent(temp={self.tempo})"
 
 
 class TimeSignatureEvent(MetaEvent):
     def __init__(self, delta_time, data):
         super().__init__(delta_time, 88)
 
-        self.numer = data[0]
-        self.denom = 2**data[1]
+        self.numerator = data[0]
+        self.denominator = 2**data[1]
         self.metro = data[2]
         self.ttnds = data[3]
 
     def __repr__(self):
-        return f"Time Signature: Numer {self.numer} Denom {self.denom} Metro {self.metro} Ttnds {self.ttnds}"
+        return f"TimeSignatureEvent(signature={self.numerator}/{self.denominator})"
 
 
 class KeySignatureEvent(MetaEvent):
@@ -134,7 +134,7 @@ class KeySignatureEvent(MetaEvent):
         self.scale = data[1]
 
     def __repr__(self):
-        return f"Key Signature: Key {self.key} Scale {self.scale}"
+        return f"KeySignatureEvent(key={self.key}, scale={self.scale})"
 
 
 def get_event(delta_time, event_type, data, meta_type=None, channel=None):
