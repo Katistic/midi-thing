@@ -168,6 +168,9 @@ class MidiFile:
                 if type(chunk.last_read_event) is not events.EndOfTrackEvent:
                     return chunk.get_next_events()
 
+    def get_delta_time_in_seconds(self, delta_time):
+        return (60 * delta_time) / (self.tempo * self.header.time_division)
+
 
 if __name__ == "__main__":
     with MidiFile("END_GUITAR.mid") as file:
