@@ -209,6 +209,8 @@ class MidiFile:
                 return
 
     def play(self, controller):
+        self.reset()
+
         if self.header.format_type == 1:
             threads = []
 
@@ -223,6 +225,11 @@ class MidiFile:
 
             for thread in threads:
                 thread.join()
+
+    def reset(self):
+        for chunk in self.chunks:
+            chunk.last_index = -1
+            chunk.last_read_event = None
 
     def _busy_wait(self, t):
 
