@@ -1,5 +1,7 @@
 import midistuff.midi_parser.events as events
+import threading
 import logging
+import time
 
 
 class InvalidMidiFile(Exception):
@@ -170,6 +172,50 @@ class MidiFile:
 
     def get_delta_time_in_seconds(self, delta_time):
         return (60 * delta_time) / (self.tempo * self.header.time_division)
+
+    def _play_events(self, levents, controller):
+        for event in levents:
+            if type(event) in [events.NoteOnEvent, events.NoteOffEvent]:
+                controller.send_message(
+                    event.note, event.velocity, event.channel)
+            elif type(event) is events.SetTempoEvent:
+                self.tempo = event.tempo
+
+    def _play(self, chunk, controller):
+        last_events = []
+
+        while last_events is not None:
+            if last_events == []:
+                last_events = chunk.get_next_events()
+                continue
+
+            time.sleep(
+                self.get_delta_time_in_seconds(last_events[0].delta_time))
+
+            thread = threading.Thread(
+                target=self._play_events, args=[last_events, controller])
+            thread.daemon = True
+            thread.start()
+
+            last_events = chunk.get_next_events()
+            if last_events[-1].__class__ == events.EndOfTrackEvent:
+                return
+
+    def play(self, controller):
+        if self.header.format_type == 1:
+            threads = []
+
+            for chunk in self.chunks:
+                thread = threading.Thread(
+                    target=self._play, args=[chunk, controller])
+                thread.daemon = True
+                threads.append(thread)
+
+            for thread in threads:
+                thread.start()
+
+            for thread in threads:
+                thread.join()
 
 
 def load(file_name):
