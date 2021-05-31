@@ -81,6 +81,21 @@ class MetaEvent(MidiEvent):
         self.is_meta = True
 
 
+class SequenceNumberEvent(MetaEvent):
+    def __init__(self, delta_time, data):
+        super().__init__(delta_time, 0)
+
+        self.number_msb = data[0]
+        self.number_lsb = data[1]
+
+
+class TextEvent(MetaEvent):
+    def __init__(self, delta_time, data):
+        super().__init__(delta_time, 1)
+
+        self.text = data.decode("ascii")
+
+
 class CopyrightNoticeEvent(MetaEvent):
     def __init__(self, delta_time, data):
         super().__init__(delta_time, 2)
@@ -111,6 +126,34 @@ class InstrumentNameEvent(MetaEvent):
         return f"InstrumentNameEvent(name={self.name})"
 
 
+class LyricEvent(MetaEvent):
+    def __init__(self, delta_time, data):
+        super().__init__(delta_time, 5)
+
+        self.lyric = data.decode("ascii")
+
+
+class MarkerEvent(MetaEvent):
+    def __init__(self, delta_time, data):
+        super().__init__(delta_time, 6)
+
+        self.marker = data.decode("ascii")
+
+
+class CuePointEvent(MetaEvent):
+    def __init__(self, delta_time, data):
+        super().__init__(delta_time, 7)
+
+        self.cue = data.decode("ascii")
+
+
+class MidiChannelPrefixEvent(MetaEvent):
+    def __init__(self, delta_time, data):
+        super().__init__(delta_time, 32)
+
+        self.channel = 1 + data[0]
+
+
 class EndOfTrackEvent(MetaEvent):
     def __init__(self, delta_time, data):
         super().__init__(delta_time, 47)
@@ -127,6 +170,19 @@ class SetTempoEvent(MetaEvent):
 
     def __repr__(self):
         return f"SetTempoEvent(temp={self.tempo})"
+
+
+class SMPTEOffsetEvent(MetaEvent):
+    def __init__(self, delta_time, data):
+        super().__init__(delta_time, 84)
+
+        self.hour = data[0]
+        self.minute = data[1]
+        self.secord = data[2]
+        self.frame = data[3]
+        self.sub_frame = data[4]
+
+        # TODO: Correctly define these
 
 
 class TimeSignatureEvent(MetaEvent):
@@ -153,15 +209,35 @@ class KeySignatureEvent(MetaEvent):
         return f"KeySignatureEvent(key={self.key}, scale={self.scale})"
 
 
+class SequencerSpecificEvent(MetaEvent):
+    def __init__(self, delta_time, data):
+        super().__init__(delta_time, 127)
+
+        if data[0] == 0:
+            self.manufacture_id = int.from_bytes(data[:len(data)-3])
+            self.data = data[3:]
+        else:
+            self.manufacture_id = data[0]
+            self.data = data[1:]
+
+
 def get_event(delta_time, event_type, data, meta_type=None, channel=None):
     meta_events = {
+        0: SequenceNumberEvent,
+        1: TextEvent,
         2: CopyrightNoticeEvent,
         3: TrackNameEvent,
         4: InstrumentNameEvent,
+        5: LyricEvent,
+        6: MarkerEvent,
+        7: CuePointEvent,
+        32: MidiChannelPrefixEvent,
         47: EndOfTrackEvent,
         81: SetTempoEvent,
+        84: SMPTEOffsetEvent,
         88: TimeSignatureEvent,
         89: KeySignatureEvent,
+        127: SequencerSpecificEvent
     }
 
     midi_events = {
