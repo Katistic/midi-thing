@@ -183,14 +183,21 @@ class MidiFile:
 
     def _play(self, chunk, controller):
         last_events = []
+        last_clock = 0
 
         while last_events is not None:
             if last_events == []:
                 last_events = chunk.get_next_events()
+                last_clock = time.time()
                 continue
 
-            time.sleep(
-                self.get_delta_time_in_seconds(last_events[0].delta_time))
+            try:
+                self._busy_wait(
+                    self.get_delta_time_in_seconds(last_events[0].delta_time) - (time.time() - last_clock))
+            except Exception:
+                pass
+
+            last_clock = time.time()
 
             thread = threading.Thread(
                 target=self._play_events, args=[last_events, controller])
@@ -216,6 +223,15 @@ class MidiFile:
 
             for thread in threads:
                 thread.join()
+
+    def _busy_wait(self, t):
+
+        if t < 0.01:
+            target = time.time() + t
+            while time.time() < target:
+                pass
+        else:
+            time.sleep(t)
 
 
 def load(file_name):
