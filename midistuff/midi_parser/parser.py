@@ -137,9 +137,9 @@ class MidiFile:
 
         self.chunks = []
 
-        self.open()
+        self._open()
 
-    def open(self):
+    def _open(self):
         with open(self.file, "rb", buffering=0) as file:
 
             # Read header chunk
@@ -172,8 +172,5 @@ class MidiFile:
         return (60 * delta_time) / (self.tempo * self.header.time_division)
 
 
-if __name__ == "__main__":
-    with MidiFile("END_GUITAR.mid") as file:
-        print(file.header)
-        file.read_next_chunk()
-        file.read_next_chunk()
+def load(file_name):
+    return MidiFile(file_name)
