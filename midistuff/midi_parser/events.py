@@ -33,9 +33,18 @@ class NoteOnEvent(MidiEvent):
         self.velocity = data[1]
 
 
+class NoteAftertouchEvent(MidiEvent):
+    def __init__(self, delta_time, data, channel):
+        super().__init__(delta_time, 10, channel)
+        self.param_count = 2
+
+        self.note = data[0]
+        self.velocity = data[1]
+
+
 class ControllerEvent(MidiEvent):
     def __init__(self, delta_time, data, channel):
-        super().__init__(delta_time, 9, channel)
+        super().__init__(delta_time, 11, channel)
         self.param_count = 2
 
         self.controller_type = data[0]
@@ -47,6 +56,13 @@ class ProgramChangeEvent(MidiEvent):
         super().__init__(delta_time, 12, channel)
 
         self.program_number = data[0]
+
+
+class ChannelAftertouchEvent(MidiEvent):
+    def __init__(self, delta_time, data, channel):
+        super().__init__(delta_time, 13, channel)
+
+        self.velocity = data[0]
 
 
 class PitchBendEvent(MidiEvent):
@@ -151,8 +167,10 @@ def get_event(delta_time, event_type, data, meta_type=None, channel=None):
     midi_events = {
         8: NoteOffEvent,
         9: NoteOnEvent,
+        10: NoteAftertouchEvent,
         11: ControllerEvent,
         12: ProgramChangeEvent,
+        13: ChannelAftertouchEvent,
         14: PitchBendEvent
     }
 
