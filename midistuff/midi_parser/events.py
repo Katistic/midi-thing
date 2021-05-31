@@ -21,7 +21,7 @@ class NoteOffEvent(MidiEvent):
         self.param_count = 2
 
         self.note = data[0]
-        self.velocity = data[1]
+        self.velocity = 0
 
 
 class NoteOnEvent(MidiEvent):
