@@ -1,4 +1,5 @@
 import logging
+import math
 
 
 class MidiEvent:
@@ -13,6 +14,16 @@ class MidiEvent:
 
         if channel is not None:
             self.channel += 1
+    
+    
+    def _get_bits_from_byte(self, byte):
+        return [(byte >> i) & 1 for i in reversed(range(0, 8))]
+    
+    
+    def delta_time_bytes(self):
+        delta_time = []
+        for byte in self.delta_time.to_bytes(0, math.ceil(self.delta_time / 255), "big"):
+            delta_time += self._get_bits_from_byte(byte)
 
 
 class NoteOffEvent(MidiEvent):
