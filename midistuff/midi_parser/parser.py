@@ -84,8 +84,10 @@ class MTrk:
 
                 event = events.get_event(
                     delta_time, event_type, event_data, meta_type)
-                event.abs_delta_time = delta_time_total
-                self.events.append(event)
+                
+                if event is not None:
+                    event.abs_delta_time = delta_time_total
+                    self.events.append(event)
             else:
                 bits = self._get_bits_from_byte(data[loaded_data])
                 event_type = self._correct_byte(bits[:4])
