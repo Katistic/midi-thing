@@ -62,12 +62,14 @@ class MTrk:
 
     def _load_data(self, data):
         loaded_data = 0
+        delta_time_total = 0
 
         while loaded_data + 1 < self.chunk_size:
             # start_loaded_data = loaded_data
             # Meta event
             delta_time, data_loaded = self._find_var_len_data(data,
                                                               loaded_data)
+            delta_time_total += delta_time
             loaded_data += data_loaded
 
             if data[loaded_data] == 255:
@@ -82,6 +84,7 @@ class MTrk:
 
                 event = events.get_event(
                     delta_time, event_type, event_data, meta_type)
+                event.abs_delta_time = delta_time_total
                 self.events.append(event)
             else:
                 bits = self._get_bits_from_byte(data[loaded_data])
@@ -97,6 +100,7 @@ class MTrk:
 
                 if event is not None:
                     self.events.append(event)
+                    event.abs_delta_time = delta_time_total
 
                     if event.param_count == 2:
                         loaded_data += 1
