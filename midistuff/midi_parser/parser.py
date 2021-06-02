@@ -38,7 +38,8 @@ class MTrk:
         self.last_index = -1
 
     def __repr__(self):
-        return "MTrk(chunk_size={})".format(self.chunk_size)
+        return "MTrk(chunk_size={}, event_count={})".format(
+            self.chunk_size, len(self.events))
 
     def _find_var_len_data(self, data, index):
         var_len_data = []
@@ -84,7 +85,7 @@ class MTrk:
 
                 event = events.get_event(
                     delta_time, event_type, event_data, meta_type)
-                
+
                 if event is not None:
                     event.abs_delta_time = delta_time_total
                     self.events.append(event)
@@ -100,12 +101,26 @@ class MTrk:
                 event = events.get_event(
                     delta_time, event_type, [param1, param2], channel=channel)
 
-                if event is not None:
-                    self.events.append(event)
-                    event.abs_delta_time = delta_time_total
+                if event is None:
+                    logging.debug("Assuming running status")
 
-                    if event.param_count == 2:
-                        loaded_data += 1
+                    loaded_data -= 2
+
+                    param1 = data[loaded_data]
+                    param2 = data[loaded_data+1]
+
+                    event = self.events[-1]
+                    event = events.get_event(
+                        event.delta_time, event.event, [param1, param2],
+                        channel=event.channel)
+
+                    loaded_data += 1
+
+                self.events.append(event)
+                event.abs_delta_time = delta_time_total
+
+                if event.param_count == 2:
+                    loaded_data += 1
 
             logging.debug("Loaded event: " + str(event))
             # print(data[start_loaded_data:loaded_data])
